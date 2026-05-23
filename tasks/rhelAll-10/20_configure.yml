@@ -1,0 +1,96 @@
+---
+- name: Create project directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ openhands_codex_proxy_project_dir }}", mode: "0750" }
+    - { path: "{{ openhands_codex_proxy_codex_home_dir }}", mode: "0750" }
+    - { path: "{{ openhands_codex_proxy_state_dir }}", mode: "0750" }
+    - { path: "{{ openhands_codex_proxy_workspace_dir }}", mode: "0750" }
+    - { path: "{{ openhands_codex_proxy_tls_dir }}", mode: "0755" }
+
+- name: Write Codex config
+  ansible.builtin.template:
+    src: codex-config.toml.j2
+    dest: "{{ openhands_codex_proxy_codex_home_dir }}/config.toml"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Write OpenHands settings
+  ansible.builtin.template:
+    src: openhands-settings.json.j2
+    dest: "{{ openhands_codex_proxy_state_dir }}/settings.json"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Generate self-signed TLS certificate
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - req
+      - -x509
+      - -newkey
+      - rsa:4096
+      - -sha256
+      - -days
+      - "825"
+      - -nodes
+      - -keyout
+      - "{{ openhands_codex_proxy_tls_dir }}/tls.key"
+      - -out
+      - "{{ openhands_codex_proxy_tls_dir }}/tls.crt"
+      - -subj
+      - "/CN={{ openhands_codex_proxy_fqdn }}"
+      - -addext
+      - "subjectAltName=DNS:{{ openhands_codex_proxy_fqdn }}"
+    creates: "{{ openhands_codex_proxy_tls_dir }}/tls.crt"
+
+- name: Set TLS private key permissions
+  ansible.builtin.file:
+    path: "{{ openhands_codex_proxy_tls_dir }}/tls.key"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Set TLS certificate permissions
+  ansible.builtin.file:
+    path: "{{ openhands_codex_proxy_tls_dir }}/tls.crt"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Write Docker Compose stack
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ openhands_codex_proxy_project_dir }}/docker-compose.yml"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: restart openhands compose stack
+
+- name: Write nginx reverse proxy config
+  ansible.builtin.template:
+    src: nginx-openhands.conf.j2
+    dest: "{{ openhands_codex_proxy_nginx_conf }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart nginx
+
+- name: Allow nginx to proxy local container ports under SELinux
+  ansible.builtin.command:
+    cmd: setsebool -P httpd_can_network_connect 1
+  changed_when: false
+  failed_when: false
+
+- name: Validate nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
+...

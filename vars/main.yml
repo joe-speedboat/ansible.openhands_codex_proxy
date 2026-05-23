@@ -1,0 +1,22 @@
+---
+openhands_codex_proxy_rhel_packages:
+  - dnf-plugins-core
+  - curl
+  - ca-certificates
+  - openssl
+  - nginx
+  - policycoreutils-python-utils
+  - nodejs
+  - npm
+  - firewalld
+  - python3
+
+openhands_codex_proxy_docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+openhands_codex_proxy_docker_repo_url: https://download.docker.com/linux/rhel/docker-ce.repo
+...

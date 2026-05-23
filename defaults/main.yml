@@ -1,0 +1,25 @@
+---
+openhands_codex_proxy_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
+openhands_codex_proxy_project_dir: /opt/openhands-codex-proxy
+openhands_codex_proxy_codex_home_dir: "{{ openhands_codex_proxy_project_dir }}/codex"
+openhands_codex_proxy_state_dir: "{{ openhands_codex_proxy_project_dir }}/openhands-state"
+openhands_codex_proxy_workspace_dir: "{{ openhands_codex_proxy_project_dir }}/workspace"
+openhands_codex_proxy_tls_dir: /etc/pki/tls/openhands
+openhands_codex_proxy_nginx_conf: /etc/nginx/conf.d/openhands.conf
+
+openhands_codex_proxy_openhands_image: docker.openhands.dev/openhands/openhands:1.7
+openhands_codex_proxy_agent_image_repo: ghcr.io/openhands/agent-server
+openhands_codex_proxy_agent_image_tag: 1.19.1-python
+openhands_codex_proxy_codex_as_api_image: node:22-alpine
+openhands_codex_proxy_codex_as_api_version: 0.4.0
+openhands_codex_proxy_codex_model: gpt-5.5
+openhands_codex_proxy_codex_proxy_port: 18080
+openhands_codex_proxy_openhands_port: 3000
+
+openhands_codex_proxy_install_codex_cli: true
+openhands_codex_proxy_enable_firewall: true
+openhands_codex_proxy_manage_docker_repo: true
+openhands_codex_proxy_start_stack: true
+openhands_codex_proxy_pull_images: true
+openhands_codex_proxy_verify: true
+...

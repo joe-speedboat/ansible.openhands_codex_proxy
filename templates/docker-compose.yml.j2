@@ -1,0 +1,63 @@
+services:
+  codex-proxy:
+    image: {{ openhands_codex_proxy_codex_as_api_image }}
+    container_name: codex-as-api
+    command: >
+      sh -lc "npm install -g codex-as-api@{{ openhands_codex_proxy_codex_as_api_version }} && codex-as-api"
+    environment:
+      CODEX_AS_API_HOST: "0.0.0.0"
+      CODEX_AS_API_PORT: "{{ openhands_codex_proxy_codex_proxy_port }}"
+      CODEX_AS_API_MODEL: "{{ openhands_codex_proxy_codex_model }}"
+      CODEX_HOME: "/root/.codex"
+      CODEX_AS_API_AUTH_PATH: "/root/.codex/auth.json"
+    volumes:
+      - {{ openhands_codex_proxy_codex_home_dir }}:/root/.codex:Z
+    ports:
+      - "172.17.0.1:{{ openhands_codex_proxy_codex_proxy_port }}:{{ openhands_codex_proxy_codex_proxy_port }}"
+    restart: unless-stopped
+
+  openhands:
+    image: {{ openhands_codex_proxy_openhands_image }}
+    container_name: openhands-app
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - |
+        update-ca-certificates >/dev/null
+        exec /app/entrypoint.sh "$@"
+      - --
+    command:
+      - /app/.venv/bin/uvicorn
+      - openhands.server.listen:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "3000"
+    environment:
+      AGENT_SERVER_IMAGE_REPOSITORY: "{{ openhands_codex_proxy_agent_image_repo }}"
+      AGENT_SERVER_IMAGE_TAG: "{{ openhands_codex_proxy_agent_image_tag }}"
+      LOG_ALL_EVENTS: "true"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      REQUESTS_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+      LLM_MODEL: "custom_openai/{{ openhands_codex_proxy_codex_model }}"
+      LLM_API_KEY: "dummy"
+      LLM_BASE_URL: "http://host.docker.internal:{{ openhands_codex_proxy_codex_proxy_port }}/v1"
+      SANDBOX_CONTAINER_URL_PATTERN: "https://{{ openhands_codex_proxy_fqdn }}/runtime/{port}"
+      OH_SANDBOX_CONTAINER_URL_PATTERN: "https://{{ openhands_codex_proxy_fqdn }}/runtime/{port}"
+      PERMITTED_CORS_ORIGINS: "https://{{ openhands_codex_proxy_fqdn }},https://{{ openhands_codex_proxy_fqdn }}/runtime"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - {{ openhands_codex_proxy_tls_dir }}/tls.crt:/usr/local/share/ca-certificates/{{ openhands_codex_proxy_fqdn }}.crt:ro
+      - {{ openhands_codex_proxy_state_dir }}:/.openhands:Z
+      - {{ openhands_codex_proxy_workspace_dir }}:/opt/workspace_base:Z
+    ports:
+      - "127.0.0.1:{{ openhands_codex_proxy_openhands_port }}:3000"
+      - "172.17.0.1:{{ openhands_codex_proxy_openhands_port }}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "{{ openhands_codex_proxy_fqdn }}:host-gateway"
+    depends_on:
+      - codex-proxy
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
