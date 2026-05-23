@@ -42,6 +42,8 @@ Important defaults are in `defaults/main.yml`.
 
 Override the default Basic Auth password for every non-lab deployment. The shipped `open` / `hands` default is intentionally simple for first-boot lab access, not a production secret.
 
+Basic Auth protects the OpenHands Web UI. The `/runtime/<port>/...` sandbox proxy path explicitly disables inherited Basic Auth so OpenHands agent-server and sandbox callbacks can work without receiving browser credentials.
+
 ## Installation
 
 Install the role using Chris's Galaxy namespace-style role directory:
