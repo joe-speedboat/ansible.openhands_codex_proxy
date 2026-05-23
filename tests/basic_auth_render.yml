@@ -1,0 +1,41 @@
+---
+- name: Verify nginx basic auth rendering
+  hosts: localhost
+  gather_facts: false
+  vars:
+    openhands_codex_proxy_fqdn: openhands.example.test
+    openhands_codex_proxy_tls_dir: /etc/pki/tls/openhands
+    openhands_codex_proxy_openhands_port: 3000
+    openhands_codex_proxy_basic_auth_file: /etc/nginx/.htpasswd-openhands
+    openhands_codex_proxy_basic_auth_realm: OpenHands
+  tasks:
+    - name: Render nginx config with basic auth enabled
+      ansible.builtin.set_fact:
+        nginx_with_basic_auth: >-
+          {{ lookup('ansible.builtin.template', playbook_dir ~ '/../templates/nginx-openhands.conf.j2', template_vars={
+            'openhands_codex_proxy_do_basic_auth': true,
+            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file
+          }) }}
+
+    - name: Assert basic auth is enabled for HTTPS locations
+      ansible.builtin.assert:
+        that:
+          - nginx_with_basic_auth is search('auth_basic "OpenHands";')
+          - nginx_with_basic_auth is search('auth_basic_user_file /etc/nginx/.htpasswd-openhands;')
+        fail_msg: nginx config must include auth_basic directives when openhands_codex_proxy_do_basic_auth is true
+
+    - name: Render nginx config with basic auth disabled
+      ansible.builtin.set_fact:
+        nginx_without_basic_auth: >-
+          {{ lookup('ansible.builtin.template', playbook_dir ~ '/../templates/nginx-openhands.conf.j2', template_vars={
+            'openhands_codex_proxy_do_basic_auth': false,
+            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file
+          }) }}
+
+    - name: Assert basic auth is omitted when disabled
+      ansible.builtin.assert:
+        that:
+          - nginx_without_basic_auth is not search('auth_basic')
+          - nginx_without_basic_auth is not search('auth_basic_user_file')
+        fail_msg: nginx config must not include auth_basic directives when openhands_codex_proxy_do_basic_auth is false
+...

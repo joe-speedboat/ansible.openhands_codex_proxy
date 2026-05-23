@@ -18,6 +18,10 @@ server {
     ssl_certificate_key {{ openhands_codex_proxy_tls_dir }}/tls.key;
     ssl_protocols TLSv1.2 TLSv1.3;
     client_max_body_size 100m;
+{% if openhands_codex_proxy_do_basic_auth | bool %}
+    auth_basic "{{ openhands_codex_proxy_basic_auth_realm }}";
+    auth_basic_user_file {{ openhands_codex_proxy_basic_auth_file }};
+{% endif %}
 
     location ~ ^/runtime/([0-9]+)(?:/(.*))?$ {
         set $runtime_port $1;

@@ -65,6 +65,26 @@
     group: root
     mode: "0644"
 
+- name: Write nginx basic auth password file
+  ansible.builtin.copy:
+    dest: "{{ openhands_codex_proxy_basic_auth_file }}"
+    owner: root
+    group: nginx
+    mode: "0640"
+    content: >-
+      {{ openhands_codex_proxy_basic_auth_user }}:{{ openhands_codex_proxy_basic_auth_password | password_hash('sha512', 'openhands') }}
+
+  no_log: true
+  when: openhands_codex_proxy_do_basic_auth | bool
+  notify: restart nginx
+
+- name: Remove nginx basic auth password file when disabled
+  ansible.builtin.file:
+    path: "{{ openhands_codex_proxy_basic_auth_file }}"
+    state: absent
+  when: not (openhands_codex_proxy_do_basic_auth | bool)
+  notify: restart nginx
+
 - name: Write Docker Compose stack
   ansible.builtin.template:
     src: docker-compose.yml.j2

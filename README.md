@@ -8,6 +8,7 @@ This role was refactored from a proven Rocky Linux 10 lab setup for OpenHands be
 
 - Docker CE and Docker Compose plugin
 - nginx reverse proxy with HTTPS and `/runtime/<port>/...` support
+- nginx Basic Auth protection for the HTTPS reverse proxy
 - `codex-as-api` in a `node:22-alpine` container
 - OpenHands in `docker.openhands.dev/openhands/openhands:1.7`
 - optional OpenAI Codex CLI via npm
@@ -34,6 +35,12 @@ Important defaults are in `defaults/main.yml`.
 | `openhands_codex_proxy_openhands_port` | `3000` | OpenHands container port on localhost/bridge |
 | `openhands_codex_proxy_install_codex_cli` | `true` | Install `@openai/codex` globally |
 | `openhands_codex_proxy_enable_firewall` | `true` | Open http/https in firewalld |
+| `openhands_codex_proxy_do_basic_auth` | `true` | Enable nginx Basic Auth on the HTTPS virtual host |
+| `openhands_codex_proxy_basic_auth_user` | `open` | Basic Auth username |
+| `openhands_codex_proxy_basic_auth_password` | `hands` | Basic Auth password |
+| `openhands_codex_proxy_basic_auth_realm` | `OpenHands` | Basic Auth realm shown by clients |
+
+Override the default Basic Auth password for every non-lab deployment. The shipped `open` / `hands` default is intentionally simple for first-boot lab access, not a production secret.
 
 ## Installation
 
@@ -58,6 +65,9 @@ roles/joe-speedboat.openhands_codex_proxy/
   become: true
   vars:
     openhands_codex_proxy_fqdn: "{{ inventory_hostname }}"
+    openhands_codex_proxy_do_basic_auth: true
+    openhands_codex_proxy_basic_auth_user: open
+    openhands_codex_proxy_basic_auth_password: hands
   roles:
     - joe-speedboat.openhands_codex_proxy
 ...
@@ -82,6 +92,7 @@ On the target:
 sudo nginx -t
 sudo docker compose -f /opt/openhands-codex-proxy/docker-compose.yml ps
 curl -skI https://<vm-fqdn>/ | sed -n '1,8p'
+curl -skI -u open:hands https://<vm-fqdn>/ | sed -n '1,8p'
 curl -sS http://172.17.0.1:18080/health
 ```
 
