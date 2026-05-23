@@ -55,7 +55,7 @@ Important defaults are in `defaults/main.yml`.
 Install the role using Chris's Galaxy namespace-style role directory:
 
 ```bash
-ansible-galaxy clone https://github.com/joe-speedboat/openhands_codex_proxy.git /etc/ansible/roles/joe-speedboat.openhands_codex_proxy
+ansible-galaxy clone https://github.com/joe-speedboat/ansible.openhands_codex_proxy.git /etc/ansible/roles/joe-speedboat.openhands_codex_proxy
 ```
 
 For project-local testing, keep the same role directory name under `./roles/`:
