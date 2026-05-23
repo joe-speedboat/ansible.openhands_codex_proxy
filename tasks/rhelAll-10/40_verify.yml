@@ -1,0 +1,38 @@
+---
+- name: Show Compose state
+  ansible.builtin.command:
+    cmd: "docker compose -f {{ openhands_codex_proxy_project_dir }}/docker-compose.yml ps"
+  register: openhands_codex_proxy_compose_ps
+  changed_when: false
+  when: openhands_codex_proxy_verify | bool
+
+- name: Print Compose state
+  ansible.builtin.debug:
+    var: openhands_codex_proxy_compose_ps.stdout_lines
+  when: openhands_codex_proxy_verify | bool
+
+- name: Verify nginx HTTPS endpoint locally
+  ansible.builtin.command:
+    cmd: "curl -skI --resolve {{ openhands_codex_proxy_fqdn }}:443:127.0.0.1 https://{{ openhands_codex_proxy_fqdn }}/"
+  register: openhands_codex_proxy_https_check
+  changed_when: false
+  retries: 30
+  delay: 2
+  until: openhands_codex_proxy_https_check.rc == 0 and ('HTTP/' in openhands_codex_proxy_https_check.stdout)
+  when: openhands_codex_proxy_verify | bool
+
+- name: Verify codex-as-api health endpoint
+  ansible.builtin.command:
+    cmd: "curl -sS http://172.17.0.1:{{ openhands_codex_proxy_codex_proxy_port }}/health"
+  register: openhands_codex_proxy_health_check
+  changed_when: false
+  retries: 30
+  delay: 2
+  until: openhands_codex_proxy_health_check.rc == 0
+  when: openhands_codex_proxy_verify | bool
+
+- name: Print codex-as-api health
+  ansible.builtin.debug:
+    var: openhands_codex_proxy_health_check.stdout
+  when: openhands_codex_proxy_verify | bool
+...

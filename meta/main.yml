@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: Chris Ruettimann
+  role_name: openhands_codex_proxy
+  namespace: joe-speedboat
+  description: OpenHands with codex-as-api behind nginx HTTPS on Enterprise Linux lab hosts.
+  license: GPLv3
+  min_ansible_version: "2.9"
+  platforms:
+    - name: EL
+      versions:
+        - "10"
+  galaxy_tags:
+    - openhands
+    - codex
+    - docker
+    - nginx
+    - rocky
+    - rhel
+    - lab
+dependencies: []
+...

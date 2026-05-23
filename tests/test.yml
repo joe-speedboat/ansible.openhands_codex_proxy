@@ -1,0 +1,7 @@
+---
+- name: Test openhands_codex_proxy role
+  hosts: all
+  become: true
+  roles:
+    - joe-speedboat.openhands_codex_proxy
+...

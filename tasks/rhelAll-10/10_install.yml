@@ -1,0 +1,40 @@
+---
+- name: Install base packages
+  ansible.builtin.dnf:
+    name: "{{ openhands_codex_proxy_rhel_packages }}"
+    state: present
+
+- name: Check Docker CE repository file
+  ansible.builtin.stat:
+    path: /etc/yum.repos.d/docker-ce.repo
+  register: openhands_codex_proxy_docker_repo_file
+
+- name: Add Docker CE repository
+  ansible.builtin.command:
+    cmd: "dnf config-manager --add-repo {{ openhands_codex_proxy_docker_repo_url }}"
+  when:
+    - openhands_codex_proxy_manage_docker_repo | bool
+    - not openhands_codex_proxy_docker_repo_file.stat.exists
+  changed_when: true
+
+- name: Install Docker packages
+  ansible.builtin.dnf:
+    name: "{{ openhands_codex_proxy_docker_packages }}"
+    state: present
+
+- name: Check installed Codex CLI
+  ansible.builtin.command:
+    cmd: /usr/local/bin/codex --version
+  register: openhands_codex_proxy_codex_cli_check
+  changed_when: false
+  failed_when: false
+  when: openhands_codex_proxy_install_codex_cli | bool
+
+- name: Install OpenAI Codex CLI
+  ansible.builtin.command:
+    cmd: npm install -g @openai/codex
+  changed_when: true
+  when:
+    - openhands_codex_proxy_install_codex_cli | bool
+    - openhands_codex_proxy_codex_cli_check.rc != 0
+...

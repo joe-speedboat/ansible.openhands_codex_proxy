@@ -1,0 +1,60 @@
+---
+- name: Enable and start Docker
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Enable and start nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started
+
+- name: Enable and start firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    enabled: true
+    state: started
+  when: openhands_codex_proxy_enable_firewall | bool
+
+- name: Open HTTP service in firewalld for redirect
+  ansible.builtin.command:
+    cmd: firewall-cmd --permanent --add-service=http
+  register: openhands_codex_proxy_firewall_http
+  changed_when: "'success' in openhands_codex_proxy_firewall_http.stdout"
+  failed_when:
+    - openhands_codex_proxy_firewall_http.rc != 0
+    - "'ALREADY_ENABLED' not in openhands_codex_proxy_firewall_http.stderr"
+  when: openhands_codex_proxy_enable_firewall | bool
+
+- name: Open HTTPS service in firewalld
+  ansible.builtin.command:
+    cmd: firewall-cmd --permanent --add-service=https
+  register: openhands_codex_proxy_firewall_https
+  changed_when: "'success' in openhands_codex_proxy_firewall_https.stdout"
+  failed_when:
+    - openhands_codex_proxy_firewall_https.rc != 0
+    - "'ALREADY_ENABLED' not in openhands_codex_proxy_firewall_https.stderr"
+  when: openhands_codex_proxy_enable_firewall | bool
+
+- name: Reload firewalld
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+  changed_when: false
+  when: openhands_codex_proxy_enable_firewall | bool
+
+- name: Pull Compose images
+  ansible.builtin.command:
+    cmd: "docker compose -f {{ openhands_codex_proxy_project_dir }}/docker-compose.yml pull"
+  changed_when: true
+  when:
+    - openhands_codex_proxy_start_stack | bool
+    - openhands_codex_proxy_pull_images | bool
+
+- name: Start OpenHands Compose stack
+  ansible.builtin.command:
+    cmd: "docker compose -f {{ openhands_codex_proxy_project_dir }}/docker-compose.yml up -d"
+  changed_when: true
+  when: openhands_codex_proxy_start_stack | bool
+...

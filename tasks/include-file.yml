@@ -1,0 +1,28 @@
+---
+- name: include {{ include_file_name }}
+  include_tasks: '{{ include_file_path }}'
+  with_first_found:
+    - files:
+        # order example for: rocky 9  +  RHEL 9
+        # tasks/Rocky-9.0                tasks/RedHat-9.0
+        # tasks/Rocky-9                  tasks/RedHat-9
+        # tasks/Rocky                    tasks/RedHat
+        # tasks/rhelAll-9.0              tasks/rhelAll-9.0
+        # tasks/rhelAll-9                tasks/rhelAll-9
+        # tasks/rhelAll                  tasks/rhelAll
+        # tasks/RedHat                   tasks/RedHat -> only useful for debianX
+        # tasks/shared                   tasks/shared
+        # regular facts will get catched first, eg.: Rocky-9 or RedHat-9 or AlmaLinux9
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution }}-{{ ansible_distribution_version }}/{{ include_file_name }}"
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution }}-{{ ansible_distribution_major_version }}/{{ include_file_name }}"
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution }}/{{ include_file_name }}"
+        # ansible_distribution_combine var will cover Rocky-9 and RedHat-9 and AlmaLinux9
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution_combine }}-{{ ansible_distribution_version }}/{{ include_file_name }}"
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution_combine }}-{{ ansible_distribution_major_version }}/{{ include_file_name }}"
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_distribution_combine }}/{{ include_file_name }}"
+        # if all fails, we fallback to os family
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/{{ ansible_os_family }}/{{ include_file_name }}"
+        - "{{ vars['task_dir_' + role_name|split('.')|last] }}/shared/{{ include_file_name }}"
+  loop_control:
+    loop_var: include_file_path
+...
