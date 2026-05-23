@@ -17,7 +17,7 @@ This role was refactored from a proven Rocky Linux 10 lab setup for OpenHands be
 
 ## Requirements
 
-- Ansible 2.9 or newer
+- Ansible Core 13.3 or newer (tested with)
 - Rocky Linux / RHEL-compatible EL 10 target
 - Root privileges via `become: true`
 - Network access from target to Docker CE repository, npm, and container registries
@@ -47,13 +47,7 @@ Override the default Basic Auth password for every non-lab deployment. The shipp
 Install the role using Chris's Galaxy namespace-style role directory:
 
 ```bash
-ansible-galaxy clone https://github.com/joe-speedboat/ansible.openhands_codex_proxy.git /etc/ansible/roles/joe-speedboat.openhands_codex_proxy
-```
-
-For project-local testing, keep the same role directory name under `./roles/`:
-
-```text
-roles/joe-speedboat.openhands_codex_proxy/
+ansible-galaxy role install joe-speedboat.openhands_codex_proxy
 ```
 
 ## Example Playbook
