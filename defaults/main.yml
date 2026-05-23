@@ -6,6 +6,7 @@ openhands_codex_proxy_state_dir: "{{ openhands_codex_proxy_project_dir }}/openha
 openhands_codex_proxy_workspace_dir: "{{ openhands_codex_proxy_project_dir }}/workspace"
 openhands_codex_proxy_tls_dir: /etc/pki/tls/openhands
 openhands_codex_proxy_nginx_conf: /etc/nginx/conf.d/openhands.conf
+openhands_codex_proxy_basic_auth_file: /etc/nginx/.htpasswd-openhands
 
 openhands_codex_proxy_openhands_image: docker.openhands.dev/openhands/openhands:1.7
 openhands_codex_proxy_agent_image_repo: ghcr.io/openhands/agent-server
@@ -22,4 +23,9 @@ openhands_codex_proxy_manage_docker_repo: true
 openhands_codex_proxy_start_stack: true
 openhands_codex_proxy_pull_images: true
 openhands_codex_proxy_verify: true
+
+openhands_codex_proxy_do_basic_auth: true
+openhands_codex_proxy_basic_auth_user: open
+openhands_codex_proxy_basic_auth_password: hands
+openhands_codex_proxy_basic_auth_realm: OpenHands
 ...
