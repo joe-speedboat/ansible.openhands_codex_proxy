@@ -4,21 +4,6 @@ Deploy OpenHands on Enterprise Linux 10 behind nginx HTTPS with `codex-as-api` a
 
 This role was refactored from a proven Rocky Linux 10 lab setup for OpenHands behind nginx with `codex-as-api` as Codex OAuth proxy.
 
-## Template layout
-
-This role uses the Bitbull dynamic task-discovery template. The shared engine files stay untouched:
-
-- `tasks/main.yml`
-- `tasks/include-file.yml`
-
-The implementation for EL/Rocky/RHEL/AlmaLinux 10 lives in:
-
-```text
-tasks/rhelAll-10/
-```
-
-Do not add an OS assert inside a generic `rhelAll` task to simulate version targeting. If a role is for RHEL-like version 10, put the files in `rhelAll-10` and let `include-file.yml` choose that directory from Ansible facts.
-
 ## What it installs
 
 - Docker CE and Docker Compose plugin
