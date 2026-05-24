@@ -27,6 +27,12 @@ server {
 {% if openhands_codex_proxy_do_basic_auth | bool %}
         auth_basic off;
 {% endif %}
+{% if openhands_codex_proxy_runtime_access_mode == 'allowlist' %}
+{% for cidr in openhands_codex_proxy_runtime_allowed_cidrs %}
+        allow {{ cidr }};
+{% endfor %}
+        deny all;
+{% endif %}
         set $runtime_port $1;
         set $runtime_path $2;
         if ($runtime_path = "") { set $runtime_path ""; }
