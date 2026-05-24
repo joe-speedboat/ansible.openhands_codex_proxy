@@ -24,6 +24,16 @@
           - nginx_with_basic_auth is search('auth_basic_user_file /etc/nginx/.htpasswd-openhands;')
         fail_msg: nginx config must include auth_basic directives when openhands_codex_proxy_do_basic_auth is true
 
+    - name: Extract runtime location block
+      ansible.builtin.set_fact:
+        nginx_runtime_location: "{{ nginx_with_basic_auth.split('location ~ ^/runtime/')[1].split('location /')[0] }}"
+
+    - name: Assert runtime proxy is not protected by basic auth
+      ansible.builtin.assert:
+        that:
+          - nginx_runtime_location is search('auth_basic off;')
+        fail_msg: OpenHands runtime URLs must disable inherited Basic Auth because sandbox and agent-server callbacks use them directly
+
     - name: Render nginx config with basic auth disabled
       ansible.builtin.set_fact:
         nginx_without_basic_auth: >-

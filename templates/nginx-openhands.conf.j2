@@ -24,6 +24,9 @@ server {
 {% endif %}
 
     location ~ ^/runtime/([0-9]+)(?:/(.*))?$ {
+{% if openhands_codex_proxy_do_basic_auth | bool %}
+        auth_basic off;
+{% endif %}
         set $runtime_port $1;
         set $runtime_path $2;
         if ($runtime_path = "") { set $runtime_path ""; }
