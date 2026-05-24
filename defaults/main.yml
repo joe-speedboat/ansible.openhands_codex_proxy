@@ -28,4 +28,6 @@ openhands_codex_proxy_do_basic_auth: true
 openhands_codex_proxy_basic_auth_user: open
 openhands_codex_proxy_basic_auth_password: hands
 openhands_codex_proxy_basic_auth_realm: OpenHands
+openhands_codex_proxy_runtime_access_mode: public
+openhands_codex_proxy_runtime_allowed_cidrs: []
 ...

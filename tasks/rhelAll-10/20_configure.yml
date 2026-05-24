@@ -1,4 +1,13 @@
 ---
+- name: Validate runtime access control settings
+  ansible.builtin.assert:
+    that:
+      - openhands_codex_proxy_runtime_access_mode in ['public', 'allowlist']
+      - openhands_codex_proxy_runtime_access_mode != 'allowlist' or (openhands_codex_proxy_runtime_allowed_cidrs | length > 0)
+    fail_msg: >-
+      openhands_codex_proxy_runtime_access_mode must be 'public' or 'allowlist'.
+      When using 'allowlist', set at least one CIDR in openhands_codex_proxy_runtime_allowed_cidrs.
+
 - name: Create project directories
   ansible.builtin.file:
     path: "{{ item.path }}"

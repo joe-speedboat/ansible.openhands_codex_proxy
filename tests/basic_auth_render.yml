@@ -14,7 +14,9 @@
         nginx_with_basic_auth: >-
           {{ lookup('ansible.builtin.template', playbook_dir ~ '/../templates/nginx-openhands.conf.j2', template_vars={
             'openhands_codex_proxy_do_basic_auth': true,
-            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file
+            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file,
+            'openhands_codex_proxy_runtime_access_mode': 'public',
+            'openhands_codex_proxy_runtime_allowed_cidrs': []
           }) }}
 
     - name: Assert basic auth is enabled for HTTPS locations
@@ -34,12 +36,37 @@
           - nginx_runtime_location is search('auth_basic off;')
         fail_msg: OpenHands runtime URLs must disable inherited Basic Auth because sandbox and agent-server callbacks use them directly
 
+    - name: Render nginx config with runtime allowlist enabled
+      ansible.builtin.set_fact:
+        nginx_with_runtime_allowlist: >-
+          {{ lookup('ansible.builtin.template', playbook_dir ~ '/../templates/nginx-openhands.conf.j2', template_vars={
+            'openhands_codex_proxy_do_basic_auth': true,
+            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file,
+            'openhands_codex_proxy_runtime_access_mode': 'allowlist',
+            'openhands_codex_proxy_runtime_allowed_cidrs': ['10.0.0.0/8', '192.168.0.0/16']
+          }) }}
+
+    - name: Extract allowlisted runtime location block
+      ansible.builtin.set_fact:
+        nginx_allowlisted_runtime_location: "{{ nginx_with_runtime_allowlist.split('location ~ ^/runtime/')[1].split('location /')[0] }}"
+
+    - name: Assert runtime allowlist renders inside runtime location
+      ansible.builtin.assert:
+        that:
+          - nginx_allowlisted_runtime_location is search('auth_basic off;')
+          - nginx_allowlisted_runtime_location is search('allow 10.0.0.0/8;')
+          - nginx_allowlisted_runtime_location is search('allow 192.168.0.0/16;')
+          - nginx_allowlisted_runtime_location is search('deny all;')
+        fail_msg: Runtime allowlist mode must render nginx allow/deny directives inside the runtime location
+
     - name: Render nginx config with basic auth disabled
       ansible.builtin.set_fact:
         nginx_without_basic_auth: >-
           {{ lookup('ansible.builtin.template', playbook_dir ~ '/../templates/nginx-openhands.conf.j2', template_vars={
             'openhands_codex_proxy_do_basic_auth': false,
-            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file
+            'openhands_codex_proxy_basic_auth_file': openhands_codex_proxy_basic_auth_file,
+            'openhands_codex_proxy_runtime_access_mode': 'public',
+            'openhands_codex_proxy_runtime_allowed_cidrs': []
           }) }}
 
     - name: Assert basic auth is omitted when disabled
