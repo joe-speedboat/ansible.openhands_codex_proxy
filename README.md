@@ -39,8 +39,8 @@ Important defaults are in `defaults/main.yml`.
 | `openhands_codex_proxy_basic_auth_user` | `open` | Basic Auth username |
 | `openhands_codex_proxy_basic_auth_password` | `hands` | Basic Auth password |
 | `openhands_codex_proxy_basic_auth_realm` | `OpenHands` | Basic Auth realm shown by clients |
-| `openhands_codex_proxy_runtime_access_mode` | `public` | Runtime proxy access mode: `public` or `allowlist` |
-| `openhands_codex_proxy_runtime_allowed_cidrs` | `[]` | CIDR list rendered as nginx `allow` rules when runtime access mode is `allowlist` |
+| `openhands_codex_proxy_runtime_access_mode` | `allowlist` | Runtime proxy access mode: `public` or `allowlist` |
+| `openhands_codex_proxy_runtime_allowed_cidrs` | `[ '10.0.0.0/8', '192.168.0.0/16', '172.16.0.0/12' ]` | CIDR list rendered as nginx `allow` rules when runtime access mode is `allowlist` |
 
 Override the default Basic Auth password for every non-lab deployment. The shipped `open` / `hands` default is intentionally simple for first-boot lab access, not a production secret.
 
