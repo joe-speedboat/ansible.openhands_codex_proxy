@@ -2,6 +2,9 @@
 - name: Test openhands_codex_proxy role
   hosts: all
   become: true
+  vars:
+    openhands_codex_proxy_basic_auth_user: open
+    openhands_codex_proxy_basic_auth_password: hands
   roles:
     - joe-speedboat.openhands_codex_proxy
 ...
