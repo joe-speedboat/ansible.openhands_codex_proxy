@@ -68,6 +68,10 @@ Install the role using Chris's Galaxy namespace-style role directory:
 ```bash
 ansible-galaxy role install joe-speedboat.openhands_codex_proxy
 ```
+or
+```bash
+git clone https://github.com/joe-speedboat/ansible.openhands_codex_proxy.git /etc/ansible/roles/joe-speedboat.openhands_codex_proxy
+```
 
 ## Example Playbook
 
@@ -78,7 +82,6 @@ ansible-galaxy role install joe-speedboat.openhands_codex_proxy
   become: true
   vars:
     openhands_codex_proxy_fqdn: "{{ inventory_hostname }}"
-    openhands_codex_proxy_do_basic_auth: true
     openhands_codex_proxy_basic_auth_user: open
     openhands_codex_proxy_basic_auth_password: hands
   roles:
